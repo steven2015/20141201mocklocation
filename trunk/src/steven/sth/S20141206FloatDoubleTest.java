@@ -24,5 +24,6 @@ public class S20141206FloatDoubleTest{
 		final float f = (float)22.342075;
 		final double e = Double.parseDouble(String.valueOf(f));
 		System.out.println(e);
+		System.out.println("        \n");
 	}
 }
