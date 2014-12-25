@@ -183,13 +183,15 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final HashMap<String, ArrayList<UpdateRecord>> mRecordsByProvider =
             new HashMap<String, ArrayList<UpdateRecord>>();
 
+    // Steven
     // mapping from provider name to last known location
-    private final HashMap<String, Location> mLastLocation = new HashMap<String, Location>();
+    private final HashMap<String, Location> mLastLocation = new MockHashMap(this);
 
+	// Steven
     // same as mLastLocation, but is not updated faster than LocationFudger.FASTEST_INTERVAL_MS.
     // locations stored here are not fudged for coarse permissions.
     private final HashMap<String, Location> mLastLocationCoarseInterval =
-            new HashMap<String, Location>();
+            new MockHashMap(this);
 
     // all providers that operate over proxy, for authorizing incoming location
     private final ArrayList<LocationProviderProxy> mProxyProviders =
@@ -2442,11 +2444,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 			if(location.getAccuracy() > 40){
 				location.setAccuracy((int)(30 + Math.random() * 10));
 			}
-			// mock / smooth
+			// mock
 			if(this.mocking && this.mockLocation != null){
-				//if(LocationManager.FUSED_PROVIDER.equals(location.getProvider()) == false){
-					applyMock(location);
-				//}
+				applyMock(location);
 				if(logging){
 					this.log("mock", location);
 				}
@@ -2505,8 +2505,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 	}
 	@Override
 	public Location applyMock(final Location location){
-		location.setLatitude(this.floatToDouble((float)(this.mockLocation.getLatitude() + 0.00005 * (Math.random() - 0.5))));
-		location.setLongitude(this.floatToDouble((float)(this.mockLocation.getLongitude() + 0.00005 * (Math.random() - 0.5))));
+		location.setLatitude(this.floatToDouble((float)(this.mockLocation.getLatitude() + 0.00003 * (Math.random() - 0.5))));
+		location.setLongitude(this.floatToDouble((float)(this.mockLocation.getLongitude() + 0.00003 * (Math.random() - 0.5))));
 		location.setAccuracy((int)(10 + location.distanceTo(this.mockLocation)));
 		if(this.lastLocation != null){
 			final long duration = location.getTime() - this.lastLocation.getTime();
@@ -2521,5 +2521,31 @@ public class LocationManagerService extends ILocationManager.Stub {
 			location.setAltitude((int)(location.getAltitude() + Math.random() * 2));
 		}
 		return location;
+	}
+	@Override
+	public void triggerReportLocation(){
+		final Location location = new Location(this.lastLocation);
+		location.setProvider(LocationManager.FUSED_PROVIDER);
+		location.setTime(System.currentTimeMillis());
+		location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+		this.handleLocationChanged(location, false);
+	}
+	
+	private final class MockHashMap extends HashMap<String, Location>{
+		private LocationManagerService service;
+		private MockHashMap(final LocationManagerService service){
+			this.service = service;
+		}
+		@Override
+		public Location get(Object key){
+			final Location value = super.get(key);
+			if(value == null){
+				return null;
+			}else if(service.mocking){
+				return service.lastLocation;
+			}else{
+				return value;
+			}
+		}
 	}
 }

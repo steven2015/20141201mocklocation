@@ -102,5 +102,6 @@ interface ILocationManager
 	void setLogging(in boolean enabled);
 	Location getLastGoodLocation();
 	Location applyMock(in Location location);
+	void triggerReportLocation();
 
 }

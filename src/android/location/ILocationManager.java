@@ -83,5 +83,6 @@ public interface ILocationManager{
 	void setLogging(boolean enabled) throws RemoteException;
 	Location getLastGoodLocation() throws RemoteException;
 	Location applyMock(Location location) throws RemoteException;
+	void triggerReportLocation() throws RemoteException;
 
 }
