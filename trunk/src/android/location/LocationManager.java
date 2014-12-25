@@ -1735,4 +1735,11 @@ public class LocationManager {
 		}
 		return location;
 	}
+	public void triggerReportLocation(){
+		try{
+			this.mService.triggerReportLocation();
+		}catch(final RemoteException e){
+			Log.e(LocationManager.TAG, "RemoteException", e);
+		}
+	}
 }
