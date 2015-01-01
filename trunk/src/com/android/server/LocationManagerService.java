@@ -1786,6 +1786,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isProviderEnabled(String provider) {
+    	// Steven
+    	if(this.mocking){
+    		return true;
+    	}
         // TODO: remove this check in next release, see b/10696351
         checkResolutionLevelIsSufficientForProviderUse(getCallerAllowedResolutionLevel(),
                 provider);
@@ -2183,6 +2187,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     // Mock Providers
 
     private void checkMockPermissionsSafe() {
+    	return;
+    	/*
         boolean allowMocks = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ALLOW_MOCK_LOCATION, 0) == 1;
         if (!allowMocks) {
@@ -2193,6 +2199,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ACCESS_MOCK_LOCATION permission");
         }
+        */
     }
 
     @Override
@@ -2490,6 +2497,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 	@Override
 	public void setMocking(final boolean enabled){
 		this.mocking = enabled;
+		if(this.mocking){
+			this.addTestProvider(LocationManager.GPS_PROVIDER, new ProviderProperties(false,
+	                false, false, false, false, true,
+	                true, Criteria.POWER_LOW, Criteria.ACCURACY_FINE));
+		}else{
+			this.removeTestProvider(LocationManager.GPS_PROVIDER);
+		}
 	}
 	@Override
 	public boolean isLogging(){
