@@ -2498,11 +2498,27 @@ public class LocationManagerService extends ILocationManager.Stub {
 	public void setMocking(final boolean enabled){
 		this.mocking = enabled;
 		if(this.mocking){
-			this.addTestProvider(LocationManager.GPS_PROVIDER, new ProviderProperties(false,
-	                false, false, false, false, true,
-	                true, Criteria.POWER_LOW, Criteria.ACCURACY_FINE));
+	        long identity = Binder.clearCallingIdentity();
+	        synchronized (mLock) {
+	            LocationProviderInterface p = mProvidersByName.get(LocationManager.GPS_PROVIDER);
+	            if (p != null) {
+	                removeProviderLocked(p);
+	            }
+	        }
+	        Binder.restoreCallingIdentity(identity);
 		}else{
-			this.removeTestProvider(LocationManager.GPS_PROVIDER);
+	        synchronized (mLock) {
+	            long identity = Binder.clearCallingIdentity();
+	            LocationProviderInterface realProvider = mRealProviders.get(LocationManager.GPS_PROVIDER);
+	            if (realProvider != null) {
+	                addProviderLocked(realProvider);
+	                final ContentResolver resolver = mContext.getContentResolver();
+	                if(Settings.Secure.isLocationProviderEnabledForUser(resolver, LocationManager.GPS_PROVIDER, mCurrentUserId)){
+	                	realProvider.enable();
+	                }
+	            }
+	            Binder.restoreCallingIdentity(identity);
+	        }
 		}
 	}
 	@Override
