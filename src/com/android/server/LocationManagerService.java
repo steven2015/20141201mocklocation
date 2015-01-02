@@ -2519,8 +2519,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 	}
 	@Override
 	public Location applyMock(final Location location){
-		location.setLatitude(this.floatToDouble((float)(this.mockLocation.getLatitude() + 0.00003 * (Math.random() - 0.5))));
-		location.setLongitude(this.floatToDouble((float)(this.mockLocation.getLongitude() + 0.00003 * (Math.random() - 0.5))));
+		location.setLatitude(this.floatToDouble((float)(this.mockLocation.getLatitude() + 0.00002 * (Math.random() - 0.5))));
+		location.setLongitude(this.floatToDouble((float)(this.mockLocation.getLongitude() + 0.00002 * (Math.random() - 0.5))));
 		location.setAccuracy((int)(10 + location.distanceTo(this.mockLocation)));
 		if(this.lastLocation != null){
 			final long duration = location.getTime() - this.lastLocation.getTime();
@@ -2553,10 +2553,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 		@Override
 		public Location get(Object key){
 			final Location value = super.get(key);
-			if(value == null){
-				return null;
-			}else if(service.mocking){
+			if(service.mocking){
 				return service.lastLocation;
+			}else if(value == null){
+				return null;
 			}else{
 				return value;
 			}
